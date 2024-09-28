@@ -84,6 +84,7 @@ dependencies {
     implementation(libs.coil.compose)
 
     implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
 
     implementation(libs.media3)
 }

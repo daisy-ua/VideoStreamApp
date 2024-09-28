@@ -47,6 +47,7 @@ room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomVersion" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilVersion" }
 
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion"}
+retrofit-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofitVersion"}
 
 media3 = { module = "androidx.media3:media3-exoplayer", version.ref = "exoplayerVersion" }
 

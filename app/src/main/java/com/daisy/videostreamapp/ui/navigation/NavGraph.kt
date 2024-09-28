@@ -2,6 +2,7 @@ package com.daisy.videostreamapp.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,7 +22,9 @@ fun NavGraph(
         startDestination = startDestination
     ) {
         composable(VIDEO_LIST_ROUTE.name) { navBackStackEntry ->
-            VideoListScreen()
+            VideoListScreen(
+                viewModel = hiltViewModel()
+            )
         }
     }
 }
