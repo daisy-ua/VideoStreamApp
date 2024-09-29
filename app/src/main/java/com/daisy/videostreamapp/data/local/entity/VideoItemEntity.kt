@@ -5,8 +5,6 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "video")
 data class VideoItemEntity(
-
-    @PrimaryKey(autoGenerate = true)
     val id: Long,
 
     val description: String?,
@@ -17,5 +15,6 @@ data class VideoItemEntity(
 
     val thumb: String?,
 
+    @PrimaryKey
     val title: String,
 )

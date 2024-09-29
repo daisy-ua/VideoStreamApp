@@ -8,6 +8,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import com.daisy.videostreamapp.data.repository.VideoRepository
 import com.daisy.videostreamapp.domain.entity.VideoItem
+import com.daisy.videostreamapp.util.VideoStateRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,6 +19,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class VideoListViewModel @Inject constructor(
+    private val savedStateRepository: VideoStateRepository,
     videoRepository: VideoRepository,
     private val player: Player,
 ) : ViewModel() {
@@ -49,14 +51,34 @@ class VideoListViewModel @Inject constructor(
     }
 
     init {
+        _currentVideo.value = savedStateRepository.savedStateVideoItem
+        val savedPosition = savedStateRepository.savedStateVideoPosition
+        _lastPlayedIndex.value = savedStateRepository.savedStateVideoIndex
+
+        currentVideo.value?.let {
+            player.clearMediaItems()
+            player.setMediaItem(it.mediaItem.first())
+            player.seekTo(savedPosition)
+            player.prepare()
+        }
+
         initializePlaylist()
         player.addListener(mediaItemTransitionListener)
         player.addListener(mediaItemErrorListener)
     }
 
+    fun savePlayerState() {
+        savedStateRepository.savePlayerState(player, currentVideo.value)
+    }
+
+    private fun resetPlayerState() {
+        savedStateRepository.resetPlayerState()
+    }
+
     fun playVideo(index: Int) {
-        if (index < player.mediaItemCount) {
-            player.seekTo(index, 0)
+        if (player.playbackState == Player.STATE_READY) {
+            resetPlayerState()
+            player.seekTo(index, savedStateRepository.savedStateVideoPosition)
             player.playWhenReady = true
         }
     }
@@ -67,10 +89,14 @@ class VideoListViewModel @Inject constructor(
 
     private fun initializePlaylist() = viewModelScope.launch {
         videos.collect {
-            it.forEach { item ->
-                player.addMediaItem(item.mediaItem.first())
+            it.forEachIndexed { index, item ->
+                if (index < lastPlayedIndex.value) {
+                    player.addMediaItem(index, item.mediaItem.first())
+                } else if (index > lastPlayedIndex.value) {
+                    player.addMediaItem(item.mediaItem.first())
+                }
             }
-
+            Log.d("daisy-ua", "Player init: ${player.mediaItemCount}")
             player.prepare()
         }
     }
@@ -84,9 +110,3 @@ class VideoListViewModel @Inject constructor(
         }
     }
 }
-
-val videoUrl =
-    "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
-
-val fakeUrl =
-    "http://commondatastorage.gooiiigleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"

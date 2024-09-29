@@ -45,7 +45,12 @@ fun VideoPlayerScreen(
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             lifecycle = event
+
+            if (event == Lifecycle.Event.ON_PAUSE || event == Lifecycle.Event.ON_STOP) {
+                viewModel.savePlayerState()
+            }
         }
+
         lifecycleOwner.lifecycle.addObserver(observer)
 
         onDispose {
