@@ -7,11 +7,13 @@ import androidx.media3.common.Player
 import com.daisy.videostreamapp.domain.entity.VideoItem
 import com.daisy.videostreamapp.domain.repository.VideoRepository
 import com.daisy.videostreamapp.util.PlayerController
+import com.daisy.videostreamapp.util.Resource
 import com.daisy.videostreamapp.util.VideoStateRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,14 +21,19 @@ import javax.inject.Inject
 @HiltViewModel
 class VideoListViewModel @Inject constructor(
     savedStateRepository: VideoStateRepository,
-    videoRepository: VideoRepository,
+    private val videoRepository: VideoRepository,
     private val playerController: PlayerController
 ) : ViewModel() {
     val currentPlayer: Player
         get() = playerController.currentPlayer
 
-    val videos: StateFlow<List<VideoItem>> = videoRepository.getVideos()
-        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    private val _videos: MutableStateFlow<Resource<List<VideoItem>>> =
+        MutableStateFlow(Resource.Loading())
+    val videos: StateFlow<Resource<List<VideoItem>>> = _videos
+        .onStart {
+            refreshData()
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000L), Resource.Loading())
 
     private val _currentVideo = MutableStateFlow<VideoItem?>(null)
     val currentVideo: StateFlow<VideoItem?> = _currentVideo
@@ -50,6 +57,12 @@ class VideoListViewModel @Inject constructor(
         initializePlaylist()
     }
 
+    fun refreshData() = viewModelScope.launch {
+        videoRepository.getVideos().collect {
+            _videos.value = it
+        }
+    }
+
     fun playVideo(index: Int) {
         playerController.playMedia(index)
     }
@@ -63,13 +76,15 @@ class VideoListViewModel @Inject constructor(
     }
 
     private fun initializePlaylist() = viewModelScope.launch {
-        videos.collect {
-            playerController.initializePlaylist(it, lastPlayedIndex.value)
+        videos.collect { resource ->
+            if (resource is Resource.Success) {
+                playerController.initializePlaylist(resource.data!!, lastPlayedIndex.value)
+            }
         }
     }
 
     private fun updateCurrentVideo(mediaItem: MediaItem) {
-        val videoItem = videos.value.find { it.mediaItem.first() == mediaItem }
+        val videoItem = videos.value.data?.find { it.mediaItem.first() == mediaItem }
         _currentVideo.value = videoItem
     }
 
