@@ -7,9 +7,9 @@ import androidx.navigation.NavHostController
 class NavigationActions(navController: NavHostController) {
 
     val navigateToVideoScreen =
-        { url: String, from: NavBackStackEntry ->
+        { index: Int, from: NavBackStackEntry ->
             if (from.lifecycleIsResumed()) {
-                navController.navigate("${AppDestination.VIDEO_LIST_ROUTE.name}/$url")
+                navController.navigate("${AppDestination.VIDEO_URL_ROUTE.name}/$index")
             }
         }
 

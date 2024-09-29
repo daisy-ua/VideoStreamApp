@@ -1,10 +1,9 @@
 package com.daisy.videostreamapp.domain.entity
 
+import androidx.media3.common.MediaItem
 import com.daisy.videostreamapp.data.remote.ApiPath
 
 data class VideoItem(
-    val id: Long,
-
     val description: String?,
 
     val subtitle: String,
@@ -17,4 +16,7 @@ data class VideoItem(
 ) {
     val fullThumbUrl: String?
         get() = thumb?.let { "${ApiPath.IMAGE_BASE_URL}$it" }
+
+    val mediaItem: List<MediaItem>
+        get() = sources.map { uri -> MediaItem.fromUri(uri) }
 }
