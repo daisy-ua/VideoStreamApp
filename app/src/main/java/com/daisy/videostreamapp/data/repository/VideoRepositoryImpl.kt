@@ -6,6 +6,7 @@ import com.daisy.videostreamapp.data.remote.service.VideoService
 import com.daisy.videostreamapp.data.repository.mapper.toDomain
 import com.daisy.videostreamapp.data.repository.mapper.toEntity
 import com.daisy.videostreamapp.domain.entity.VideoItem
+import com.daisy.videostreamapp.domain.repository.VideoRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow

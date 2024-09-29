@@ -1,4 +1,4 @@
-package com.daisy.videostreamapp.data.repository
+package com.daisy.videostreamapp.domain.repository
 
 import com.daisy.videostreamapp.domain.entity.VideoItem
 import kotlinx.coroutines.flow.Flow

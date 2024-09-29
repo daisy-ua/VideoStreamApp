@@ -1,6 +1,6 @@
 package com.daisy.videostreamapp.di
 
-import com.daisy.videostreamapp.data.repository.VideoRepository
+import com.daisy.videostreamapp.domain.repository.VideoRepository
 import com.daisy.videostreamapp.data.repository.VideoRepositoryImpl
 import dagger.Binds
 import dagger.Module
